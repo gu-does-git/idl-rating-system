@@ -6,6 +6,7 @@ import type { League as League } from "../../types/scheduleType";
 import { useEffect, useState } from "react";
 
 import ScheduleCard from "./GameCards/ScheduleCard";
+import ScheduleCardSkeleton from "./GameCards/ScheduleCardSkeleton";
 
 export default function Schedule() {
   const [cardsToShow, setCardsToShow] = useState<number>(8);
@@ -45,23 +46,28 @@ export default function Schedule() {
     <div className="flex flex-col items-center gap-2">
       {/* Cardzada */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8 xl:grid-cols-3 2xl:grid-cols-4">
-        {weekEvents.map(
-          (event, index) =>
-            index < cardsToShow && (
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              <ScheduleCard
-                key={event.match.id}
-                event={event}
-                league={findLeagueBySlug(event.league.slug)[0]!}
-              />
-            )
-        )}
+        {weekEvents.length == 0 &&
+          Array.from(Array(8).keys()).map((index) => (
+            <ScheduleCardSkeleton key={index} />
+          ))}
+        {weekEvents.length > 0 &&
+          weekEvents.map(
+            (event, index) =>
+              index < cardsToShow && (
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                <ScheduleCard
+                  key={event.match.id}
+                  event={event}
+                  league={findLeagueBySlug(event.league.slug)[0]!}
+                />
+              )
+          )}
       </div>
 
       {/* Mostrar mais - simples */}
       <div
         className={
-          cardsToShow < weekEvents.length
+          weekEvents.length > 0 && cardsToShow < weekEvents.length
             ? "mt-7 h-2 w-full text-center shadow"
             : "hidden"
         }
