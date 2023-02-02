@@ -2,47 +2,15 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
-import moment from 'moment'; 
 import 'moment/locale/pt-br'  // without this line it didn't work
 
 
 import { api } from "../utils/api";
 
-import { getLeagues, getSchedule } from "../utils/lolesports";
-import type { Event as GameEvent } from "../types/scheduleType";
-import type { League as League } from "../types/scheduleType";
-import { useEffect, useState } from "react";
+// Imports
+import Schedule from "./components/Schedule";
 
 const Home: NextPage = () => {
-
-  const [weekEvents, setWeekEvents] = useState<GameEvent[]>([]); 
-  const [leagues, setLeagues] = useState<League[]>([]);
-  const targetLeagues = ["lcs", "cblol-brazil"];
-  function findLeagueBySlug(slug: string) {
-    return leagues.filter(function (x: { slug: string }) {
-      return x.slug == slug;
-    });
-  }
-
-  useEffect(() => {
-    getLeagues(targetLeagues)
-      .then((response: { leagues: League<[]>; leagueIds: string }) => {
-        setLeagues(response.leagues);
-
-        // Get Schedule
-        void getSchedule(undefined, response.leagueIds).then(
-          (response: {
-            data: { data: { schedule: { events: object[] } } };
-          }) => {
-            setWeekEvents(
-              response.data.data.schedule.events.filter(filterByThisWeek)
-            );
-          }
-        );
-      })
-      .catch((error) => console.error(error));
-  }, []);
-
   const hello = api.main.hello.useQuery({ text: "from tRPC" });
 
   return (
@@ -57,75 +25,7 @@ const Home: NextPage = () => {
           <h1 className="text-5xl font-extrabold tracking-tight text-white md:text-[5rem] sm:text-[3rem]">
             Jogos da <span className="text-[#6CCE9A]">Semana</span>
           </h1>
-          <div className="flex flex-col items-center gap-2">
-            {/* <p className="text-2xl text-white">
-              {hello.data ? hello.data.greeting : "Loading tRPC query..."}
-            </p>
-            <br />
-            <AuthShowcase /> */}
-
-            {/* Linhazada */}
-
-            {/* Cardzada */}
-            <div className="grid grid-cols-1 gap-4 2xl:grid-cols-4 xl:grid-cols-3 sm:grid-cols-2 md:gap-8">
-              {weekEvents.map(
-                (event) =>
-                  event.state == "unstarted" && (
-                    <div
-                      key={event.match.id}
-                      className="group flex max-w-xs cursor-pointer flex-col gap-4 rounded-xl bg-white/10 p-4 text-white transition-all hover:bg-white/20"
-                    >
-                      {/* Background */}
-                      <div className="z-0 flex flex-row justify-evenly relative">
-                        {/* PING de coisa importante */}
-                      <span className="animate-ping absolute inline-flex -right-6 -top-6 h-6 w-6 rounded-full bg-green-400 opacity-75 hidden"></span>
-
-                        {/* Time 1 */}
-                        <div className="h-full w-28">
-                          <img
-                            className="mx-auto h-24 w-24 drop-shadow"
-                            src={event.match.teams[0]?.image}
-                            alt={event.match.teams[0]?.name + " Logo"}
-                          />
-                          <div className="text-1xl flex h-12 min-w-full items-center justify-center overflow-hidden text-clip px-1 text-center font-medium text-white">
-                            <span>{event.match.teams[0]?.name}</span>
-                          </div>
-                        </div>
-
-                        {/* League background */}
-                        <div className="absolute -z-50 w-full h-full flex flex-col items-center justify-center pointer-events-none">
-                        <img
-                            className="mx-auto my-auto h-auto w-40 opacity-50 rotate-12 drop-shadow"
-                            src={findLeagueBySlug(event.league.slug)[0].image}
-                            alt={event.match.teams[1]?.name + " Logo"}
-                          />
-                        </div>
-
-                        {/* data */}
-                        <div className="flex h-full w-20 flex-col justify-center text-center">
-                          <h3 className="text-md font-extralight text-center text-white/75">
-                            <span>{toFirstUpperCase(moment(event.startTime).format('dddd').split("-")[0])}</span>
-                          </h3>
-                        </div>
-
-                        {/* Time 2 */}
-                        <div className="h-full w-28">
-                          <img
-                            className="mx-auto h-24 w-24 drop-shadow"
-                            src={event.match.teams[1]?.image}
-                            alt={event.match.teams[1]?.name + " Logo"}
-                          />
-                          <div className="text-1xl flex h-12 min-w-full items-center justify-center overflow-hidden text-clip px-1 text-center font-medium text-white">
-                            <span>{event.match.teams[1]?.name}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )
-              )}
-            </div>
-
-          </div>
+          <Schedule/>
         </div>
       </main>
     </>
@@ -134,36 +34,6 @@ const Home: NextPage = () => {
 
 export default Home;
 
-function filterByThisWeek(event: GameEvent) {
-  const eventDate = event.startTime.toString().split("T")[0].split("-");
-  const isDateInThisWeek = function (date: Date) {
-    const todayObj = new Date();
-    const todayDate = todayObj.getDate();
-    const todayDay = todayObj.getDay();
-
-    // get first date of week
-    const firstDayOfWeek = new Date(todayObj.setDate(todayDate - todayDay));
-
-    // first date of >>next<< week
-    const firstDayOfNextWeek = new Date(firstDayOfWeek);
-    firstDayOfNextWeek.setDate(firstDayOfNextWeek.getDate() + 7);
-
-    // if date is equal or within the first and last dates of the week
-    return date >= firstDayOfWeek && date <= firstDayOfNextWeek;
-  };
-
-  if (isDateInThisWeek(new Date(eventDate))) {
-    if (event.match === undefined || event.match.id === undefined) return false;
-
-    return true;
-  } else {
-    return false;
-  }
-}
-function toFirstUpperCase(input:string) {
-  return input.charAt(0).toUpperCase() + input.slice(1);
-
-}
 
 const AuthShowcase: React.FC = () => {
   const { data: sessionData } = useSession();
