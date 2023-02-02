@@ -1,6 +1,7 @@
 import type { NextPage } from "next";
 import React from "react";
-import moment from "moment";
+import moment from "moment-timezone";
+
 import Image from "next/image";
 
 import type { League as League } from "../../../types/scheduleType";
@@ -33,6 +34,8 @@ const ScheduleCard: NextPage<Props> = (props) => {
             alt={event.match.teams[0]?.name + " Logo"}
             width={16*6}
             height={16*6}
+            placeholder="blur"
+            blurDataURL={event.match.teams[0]?.image}
           />
           <div className="text-1xl flex h-12 min-w-full items-center justify-center overflow-hidden text-clip px-1 text-center font-medium text-white">
             <span>{event.match.teams[0]?.name}</span>
@@ -42,21 +45,30 @@ const ScheduleCard: NextPage<Props> = (props) => {
         {/* League background */}
         <div className="pointer-events-none absolute -z-50 flex h-full w-full flex-col items-center justify-center">
         <Image
-            className="mx-auto my-auto h-auto w-40 rotate-12 opacity-75 drop-shadow"
+            className="mx-auto my-auto h-auto w-40 rotate-12 opacity-75 drop-shadow group-hover:opacity-20 transition-all"
             src={league.image}
             alt={league.name + " Logo"}
             width={16*5}
             height={16*5}
+            placeholder="blur"
+            blurDataURL={league.image}
           />
         </div>
 
         {/* data */}
         <div className="flex h-full w-20 flex-col justify-center text-center">
-          <h3 className="text-md text-center font-extralight text-white/75">
+          <h3 className="text-md text-center font-light text-indigo-50 drop-shadow-md">
             <span>
               {toFirstUpperCase(
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 moment(event.startTime).format("dddd").split("-")[0]!
+              )}
+            </span>
+            <br />
+            <span>
+              {toFirstUpperCase(
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                moment(event.startTime).tz("America/Sao Paulo").format("H:mm")
               )}
             </span>
           </h3>
@@ -70,6 +82,8 @@ const ScheduleCard: NextPage<Props> = (props) => {
             alt={event.match.teams[1]?.name + " Logo"}
             width={16*6}
             height={16*6}
+            placeholder="blur"
+            blurDataURL={event.match.teams[1]?.image}
           />
           <div className="text-1xl flex h-12 min-w-full items-center justify-center overflow-hidden text-clip px-1 text-center font-medium text-white">
             <span>{event.match.teams[1]?.name}</span>
