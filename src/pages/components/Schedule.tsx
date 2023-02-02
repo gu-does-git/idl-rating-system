@@ -8,7 +8,10 @@ import { useEffect, useState } from "react";
 import ScheduleCard from "./GameCards/ScheduleCard";
 
 export default function Schedule() {
+  const [cardsToShow, setCardsToShow] = useState<number>(8);
+
   const [weekEvents, setWeekEvents] = useState<GameEvent[]>([]);
+
   const [leagues, setLeagues] = useState<League[]>([]);
   const targetLeagues = ["lcs", "cblol-brazil"];
   function findLeagueBySlug(slug: string) {
@@ -19,7 +22,7 @@ export default function Schedule() {
 
   useEffect(() => {
     getLeagues(targetLeagues)
-      .then((response: { leagues:  Array<League>; leagueIds: string; }) => {
+      .then((response: { leagues: Array<League>; leagueIds: string }) => {
         setLeagues(response.leagues);
 
         // Get Schedule
@@ -28,7 +31,9 @@ export default function Schedule() {
             data: { data: { schedule: { events: object[] } } };
           }) => {
             setWeekEvents(
-              response.data.data.schedule.events.filter(filterByThisWeek)
+              response.data.data.schedule.events
+                .filter(filterByThisWeek)
+                .filter((event) => event.state == "unstarted")
             );
           }
         );
@@ -41,40 +46,59 @@ export default function Schedule() {
       {/* Cardzada */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8 xl:grid-cols-3 2xl:grid-cols-4">
         {weekEvents.map(
-            (event) =>
-            event.state == "unstarted" &&           
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                <ScheduleCard key={event.match.id} event={event} league={findLeagueBySlug(event.league.slug)[0]!} />
-            
+          (event, index) =>
+            index < cardsToShow && (
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              <ScheduleCard
+                key={event.match.id}
+                event={event}
+                league={findLeagueBySlug(event.league.slug)[0]!}
+              />
+            )
         )}
+      </div>
+
+      {/* Mostrar mais - simples */}
+      <div
+        className={
+          cardsToShow < weekEvents.length
+            ? "mt-7 h-2 w-full text-center shadow"
+            : "hidden"
+        }
+      >
+        <button
+          className="relative -top-2 rounded-md bg-zinc-500/50 py-2 px-3 text-sm font-semibold text-white outline outline-1 outline-zinc-500 transition-all hover:bg-zinc-500/75"
+          onClick={() => setCardsToShow(cardsToShow + 8)}
+        >
+          Ver mais jogos
+        </button>
       </div>
     </div>
   );
 }
 
 function filterByThisWeek(event: GameEvent) {
-    const eventDate = event.startTime.toString().split("T")[0]?.split("-");
-    const isDateInThisWeek = function (date: Date) {
-      const todayObj = new Date();
-      const todayDate = todayObj.getDate();
-      const todayDay = todayObj.getDay();
-  
-      // get first date of week
-      const firstDayOfWeek = new Date(todayObj.setDate(todayDate - todayDay));
-  
-      // first date of >>next<< week
-      const firstDayOfNextWeek = new Date(firstDayOfWeek);
-      firstDayOfNextWeek.setDate(firstDayOfNextWeek.getDate() + 7);
-  
-      // if date is equal or within the first and last dates of the week
-      return date >= firstDayOfWeek && date <= firstDayOfNextWeek;
-    };
-  
-    if (isDateInThisWeek(new Date(eventDate))) {
-      if (event.match === undefined || event.match.id === undefined) return false;
-      return true;
-    } else {
-      return false;
-    }
+  const eventDate = event.startTime.toString().split("T")[0]?.split("-");
+  const isDateInThisWeek = function (date: Date) {
+    const todayObj = new Date();
+    const todayDate = todayObj.getDate();
+    const todayDay = todayObj.getDay();
+
+    // get first date of week
+    const firstDayOfWeek = new Date(todayObj.setDate(todayDate - todayDay));
+
+    // first date of >>next<< week
+    const firstDayOfNextWeek = new Date(firstDayOfWeek);
+    firstDayOfNextWeek.setDate(firstDayOfNextWeek.getDate() + 7);
+
+    // if date is equal or within the first and last dates of the week
+    return date >= firstDayOfWeek && date <= firstDayOfNextWeek;
+  };
+
+  if (isDateInThisWeek(new Date(eventDate))) {
+    if (event.match === undefined || event.match.id === undefined) return false;
+    return true;
+  } else {
+    return false;
   }
-  
+}
