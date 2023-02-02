@@ -1,28 +1,21 @@
-# Create T3 App
+# Rating System 📊
+Esse projeto tem como objetivo fazer um website aonde possamos acompanhar nas notas da equipe da Ilha das Lendas a cada rodada.
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Créditos ao [Aureom](https://github.com/Aureom/live-lol-esports) pela API e pela inspiração que o projeto dele deu. 🤗
 
-## What's next? How do I make an app with this?
+Esse é um projeto criado utilizando a [T3 Stack](https://create.t3.gg/)! 🚀
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## Quais são os planos?
+Os planos estão armazenados [aqui](https://www.figma.com/file/1TSnkqzaoLUugLVZ6iwNTB/IDL---Rating-System?node-id=0%3A1) mas o objetivo principal é fazer o acesso ás informações acerca das notas dos times/players do CBLOL ficar fácil e organizadinho.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## O que falta no projeto?
+- [ ] Criar uma versão 0
+    - [ ] Criar uma visão de administrador para:
+        - Adicionar informações da rodada
+            - Notas de cada jogador e "anotações"
+    - [ ] Desenvolver as ideias para a versão 0
+        > Entrar em contato com a equipe da IDL para poder conseguir acesso ás informações passadas? ou até conteúdo de imagem.
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
-
-## Learn More
-
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
-
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
-
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
-
-## How do I deploy this?
-
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+- [ ] Versão 1: Reformular o layout e estrutura das páginas no figma (com identidade visual bonitinha)
+## Como colaborar no projeto?
+> A definir
