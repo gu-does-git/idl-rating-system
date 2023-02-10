@@ -68,7 +68,7 @@ const ScheduleCard: NextPage<Props> = (props) => {
             <span>
               {toFirstUpperCase(
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                moment(event.startTime).tz("America/Sao Paulo").format("H:mm")
+                moment(event.startTime).tz("America/Sao_Paulo").format("H:mm")
               )}
             </span>
           </h3>
