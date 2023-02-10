@@ -27,27 +27,46 @@ export function getSchedule(page?: string, leagueIds?: string) {
     },
   });
 }
+
 export async function getLeagues(targetLeagues: Array<string>) {
   return axios
     .get(`${API_URL_PERSISTED}/getLeagues?hl=pt-BR`, {
       headers: {
         "x-api-key": API_KEY,
       },
-    }) 
-    .then((response: { data: { data: { leagues: [{ slug: string, id: string}] } } }) => {
-      const leagues = response.data.data.leagues;
+    })
+    .then(
+      (response: {
+        data: { data: { leagues: [{ slug: string; id: string }] } };
+      }) => {
+        const leagues = response.data.data.leagues;
 
-      const leagueIds = leagues
-        .filter((league) => {
+        const filteredLeagues = leagues.filter((league) => {
           return targetLeagues.includes(league.slug);
-        })
-        .map((league) => {
-          return league.id;
-        })
-        .join();
+        });
 
-      return {leagues, leagueIds}
-    });
+        const leagueIds = filteredLeagues
+          .filter((league) => {
+            return targetLeagues.includes(league.slug);
+          })
+          .map((league) => {
+            return league.id;
+          })
+          .join();
+
+        return { leagues, filteredLeagues, leagueIds };
+      }
+    );
+}
+
+export function getTeams(teamSlugs?: string) {
+  return axios.get(`${API_URL_PERSISTED}/getTeams?hl=pt-BR`, {
+    params: { id: teamSlugs },
+
+    headers: {
+      "x-api-key": API_KEY,
+    },
+  });
 }
 
 export function getLiveWindowGame(gameId: string, date: string) {

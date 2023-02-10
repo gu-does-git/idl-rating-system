@@ -20,6 +20,52 @@ model Example {
     updatedAt DateTime @updatedAt
 }
 
+model Round {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    number    Int
+    team      Team     @relation(fields: [teamId], references: [id])
+    teamId    String
+}
+
+model League {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    name      String
+    slug      String
+    Team      Team[]
+}
+
+model Team {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    name      String
+    slug      String
+    code      String
+    league    League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+    leagueId  String
+    Player    Player[]
+    avgRating Int?
+    Round     Round[]
+}
+
+model Player {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    firstName String
+    lastName  String
+    role      String
+    nickName  String
+    image     String
+    team      Team     @relation(fields: [teamId], references: [id])
+    teamId    String
+    rating    Int
+}
+
 // Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
@@ -53,6 +99,7 @@ model User {
     email         String?   @unique
     emailVerified DateTime?
     image         String?
+    role          String?
     accounts      Account[]
     sessions      Session[]
 }

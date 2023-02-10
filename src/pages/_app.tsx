@@ -3,8 +3,10 @@ import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 
 import { api } from "../utils/api";
+import Layout from "./components/Layout";
 
 import "../styles/globals.css";
+import "moment/locale/pt-br"; // without this line it didn't work
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -12,7 +14,9 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <Component {...pageProps} />
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
     </SessionProvider>
   );
 };

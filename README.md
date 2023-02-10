@@ -15,7 +15,12 @@ Os planos estão armazenados [aqui](https://www.figma.com/file/1TSnkqzaoLUugLVZ6
             - Notas de cada jogador e "anotações"
     - [ ] Desenvolver as ideias para a versão 0
         > Entrar em contato com a equipe da IDL para poder conseguir acesso ás informações passadas? ou até conteúdo de imagem.
-
 - [ ] Versão 1: Reformular o layout e estrutura das páginas no figma (com identidade visual bonitinha)
+### WIP TODD
+- [x] Fazer Skeleton e loader para quando a lista de jogos estiver carregando
+- [ ] Adicionar fade out e fade in após carregamento
+- [ ] Fazer header (para poder criar visão de adm)
+    - [ ] Usar RadixUI
+
 ## Como colaborar no projeto?
 > A definir

@@ -15,7 +15,7 @@ const config = {
     defaultLocale: "en",
   },
   images: {
-    domains: ["static.lolesports.com"],
+    domains: ["static.lolesports.com", "pbs.twimg.com"],
 }
 };
 export default config;

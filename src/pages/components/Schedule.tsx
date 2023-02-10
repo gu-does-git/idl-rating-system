@@ -23,22 +23,28 @@ export default function Schedule() {
 
   useEffect(() => {
     getLeagues(targetLeagues)
-      .then((response: { leagues: Array<League>; leagueIds: string }) => {
-        setLeagues(response.leagues);
+      .then(
+        (response: {
+          leagues: Array<League>;
+          filteredLeagues: Array<League>;
+          leagueIds: string;
+        }) => {
+          setLeagues(response.leagues);
 
-        // Get Schedule
-        void getSchedule(undefined, response.leagueIds).then(
-          (response: {
-            data: { data: { schedule: { events: object[] } } };
-          }) => {
-            setWeekEvents(
-              response.data.data.schedule.events
-                .filter(filterByThisWeek)
-                .filter((event) => event.state == "unstarted")
-            );
-          }
-        );
-      })
+          // Get Schedule
+          void getSchedule(undefined, response.leagueIds).then(
+            (response: {
+              data: { data: { schedule: { events: object[] } } };
+            }) => {
+              setWeekEvents(
+                response.data.data.schedule.events
+                  .filter(filterByThisWeek)
+                  .filter((event) => event.state == "unstarted")
+              );
+            }
+          );
+        }
+      )
       .catch((error) => console.error(error));
   }, []);
 
@@ -91,7 +97,9 @@ function filterByThisWeek(event: GameEvent) {
     const todayDay = todayObj.getDay();
 
     // get first date of week
-    const firstDayOfWeek = new Date(todayObj.setDate(todayDate - todayDay));
+    //const firstDayOfWeek = new Date(todayObj.setDate(todayDate - todayDay));
+    const firstDayOfWeek = todayObj;
+    firstDayOfWeek.setDate(firstDayOfWeek.getDate() - 1);
 
     // first date of >>next<< week
     const firstDayOfNextWeek = new Date(firstDayOfWeek);
