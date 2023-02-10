@@ -63,6 +63,7 @@ export const mainRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         slug: z.string(),
+        image: z.string(),
         code: z.string(),
         leagueId: z.string(),
       })
@@ -74,6 +75,7 @@ export const mainRouter = createTRPCRouter({
             name: input.name,
             slug: input.slug,
             code: input.code,
+            image: input.image,
             league: {
               connect: { id: input.leagueId },
             },

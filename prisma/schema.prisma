@@ -29,6 +29,8 @@ model Round {
     teamId    String
 }
 
+// Round -> Times da Rodada X + Players da Rodada X
+
 model League {
     id        String   @id @default(cuid())
     createdAt DateTime @default(now())
@@ -44,6 +46,7 @@ model Team {
     updatedAt DateTime @updatedAt
     name      String
     slug      String
+    image     String
     code      String
     league    League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
     leagueId  String

@@ -308,6 +308,7 @@ export default function Ligas() {
                             postTeam.mutate({
                               name: team.name,
                               code: team.code,
+                              image: team.image,
                               slug: createTeamSlug(team.name),
                               leagueId: dbLeagues.data?.find(
                                 (o) => o.code === activeLeague.code
