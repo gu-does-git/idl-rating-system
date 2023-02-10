@@ -48,7 +48,7 @@ model Team {
     league    League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
     leagueId  String
     Player    Player[]
-    avgRating Int?
+    avgRating Float?
     Round     Round[]
 }
 
@@ -63,7 +63,7 @@ model Player {
     image     String
     team      Team     @relation(fields: [teamId], references: [id])
     teamId    String
-    rating    Int
+    rating    Float
 }
 
 // Necessary for Next auth

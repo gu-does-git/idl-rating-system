@@ -127,7 +127,7 @@ export const mainRouter = createTRPCRouter({
             image: input.image,
             role: input.role,
             nickName: input.nickName,
-            rating: 0,
+            rating: input.rating,
             team: {
               connect: { id: input.teamId },
             },
@@ -136,6 +136,30 @@ export const mainRouter = createTRPCRouter({
             team: true,
           },
         });
+
+        // Update team avg rating
+        try {
+          const team = await ctx.prisma.team.findUnique({
+            where: {
+              id: input.teamId,
+            },
+            include: {
+              Player: true,
+            },
+          });
+          let rating = 0;
+          team?.Player.forEach((player) => {
+            rating += player.rating;
+          });
+          rating = rating / team?.Player.length;
+
+          await ctx.prisma.team.update({
+            where: { id: input.teamId },
+            data: { avgRating: rating },
+          });
+        } catch (error) {
+          console.log(error);
+        }
       } catch (error) {
         console.log(error);
       }

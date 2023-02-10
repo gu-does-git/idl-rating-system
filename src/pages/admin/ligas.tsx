@@ -383,7 +383,7 @@ export default function Ligas() {
                               image: player.image,
                               role: player.role,
                               nickName: player.summonerName,
-                              rating: 0,
+                              rating: 50,
                               teamId: dbTeams.data?.find(
                                 (o) => o.code === activeTeam.code
                               )?.id,
