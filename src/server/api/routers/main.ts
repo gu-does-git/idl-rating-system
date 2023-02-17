@@ -153,7 +153,7 @@ export const mainRouter = createTRPCRouter({
           team?.Player.forEach((player) => {
             rating += player.rating;
           });
-          rating = rating / team?.Player.length;
+          rating = rating / (team?.Player.length || 0);
 
           await ctx.prisma.team.update({
             where: { id: input.teamId },

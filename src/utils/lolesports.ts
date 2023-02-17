@@ -37,7 +37,7 @@ export async function getLeagues(targetLeagues: Array<string>) {
     })
     .then(
       (response: {
-        data: { data: { leagues: [{ slug: string; id: string }] } };
+        data: { data: { leagues: [{ code: string; id: string; slug: string; name: string; }] } };
       }) => {
         const leagues = response.data.data.leagues;
 

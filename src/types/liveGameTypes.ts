@@ -63,6 +63,17 @@ export interface Schedule {
 export interface Data {
     schedule: Schedule;
 }
+export interface Player {
+    summonerName: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    id: string;
+    slug: string;
+    name: string;
+    image: string;
+    priority: number;
+}
 
 export interface LoLLiveGames {
     data: Data;

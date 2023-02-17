@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import Breadcrumb from "../components/Breadcrumb";
 
 import { getLeagues, getSchedule, getTeams } from "../../utils/lolesports";
-import type { League as League } from "../../types/scheduleType";
 
 import * as Tabs from "@radix-ui/react-tabs";
 import { api } from "../../utils/api";
 import { useSession } from "next-auth/react";
+
+import type { Team } from "../../types/scheduleType";
+import type { Event, Player } from "../../types/liveGameTypes";
 
 export default function Ligas() {
   const breadcrumb = [
@@ -17,12 +19,19 @@ export default function Ligas() {
 
   // -------------------
   // STATES
-  const [leagues, setLeagues] = useState<League[]>([]);
-  const [activeLeague, setActiveLeague] = useState({});
-  const [teams, setTeams] = useState([]);
-  const [activeTeam, setActiveTeam] = useState({});
-  const [players, setPlayers] = useState([]);
-  const { data: session, status } = useSession();
+  const [leagues, setLeagues] = useState<
+    { code: string; id: string; slug: string; name: string }[]
+  >([]);
+  const [activeLeague, setActiveLeague] = useState<{
+    code: string;
+    id: string;
+    slug: string;
+    name: string;
+  }>();
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [activeTeam, setActiveTeam] = useState<{slug: string; code: string; players: Player[];}>();
+  const [players, setPlayers] = useState<Player[]>([]);
+  const { status } = useSession();
 
   // -------------------
   // VARS
@@ -78,22 +87,33 @@ export default function Ligas() {
       await utils.main.getAllLeagues.invalidate();
     },
   });
-  const getEsportsTeams = async function (league: { id: string }) {
-    await getSchedule(undefined, league.id).then(function (response: {
-      data: { data: object };
-    }) {
-      let tempTeams = [];
+  const getEsportsTeams = function (league: {
+    id: string;
+    slug: string;
+    name: string;
+  }) {
+    const targetLeague = leagues.find((o) => o.slug == league.slug);
 
-      response.data.data.schedule.events.forEach((event) => {
-        event.match.teams.forEach((team) => {
-          if (!tempTeams.find((o) => o.code == team.code)) tempTeams.push(team);
+    getSchedule(undefined, targetLeague?.id)
+      .then(function (response: {
+        data: { data: { schedule: { events: Array<Event> } } };
+      }) {
+        const tempTeams: Array<Team> = [];
+
+        response.data.data.schedule.events.forEach((event) => {
+          event.match.teams.forEach((team) => {
+            if (!tempTeams?.find((o) => o.code == team.code))
+              tempTeams.push(team);
+          });
         });
+
+        if (tempTeams.length > 0)
+          setTeams(tempTeams.sort((a, b) => a.name.localeCompare(b.name)));
+        setActiveLeague(targetLeague);
+      })
+      .catch(function (e: Error) {
+        console.error(e);
       });
-
-
-      setTeams(tempTeams.sort((a, b) => a.name.localeCompare(b.name)));
-      setActiveLeague(league);
-    });
   };
   const postTeam = api.main.postTeam.useMutation({
     onMutate: async (newEntry) => {
@@ -111,13 +131,12 @@ export default function Ligas() {
     },
   });
   const createTeamSlug = function (teamName: string) {
-    let tempName = teamName;
-    if (tempName.split(" ").length > 2) {
-      tempName = tempName.split(" ");
+    if (teamName.split(" ").length > 2) {
+      const tempName = teamName.split(" ");
       tempName.pop();
-      tempName = tempName.join(" ");
+      teamName = tempName.join(" ");
     }
-    return tempName
+    return teamName
       .toLowerCase()
       .replace(/[^A-Za-z\s]+/g, "")
       .replaceAll(" ", "-");
@@ -137,16 +156,15 @@ export default function Ligas() {
       await utils.main.getAllTeams.invalidate();
     },
   });
-  const getTeamPlayers = async function (team: { slug: string }) {
-
-    await getTeams(team.slug).then(function (response: {
-      data: { data: { teams: Array<{ players: Array<object> }> } };
+  const getTeamPlayers = function (team: { slug: string }) {
+    getTeams(team.slug).then(function (response: {
+      data: { data: { teams: Array<{ code: string; slug: string; players: Array<Player> }> } };
     }) {
       const teams = response.data.data.teams;
       const team = teams[0];
-      setPlayers(team?.players);
-      setActiveTeam(team);
-    });
+      if (team) setPlayers(team?.players);
+      if (team) setActiveTeam(team);
+    }).catch((e) => console.error(e));
   };
   const postPlayer = api.main.postPlayer.useMutation({
     onMutate: async (newEntry) => {
@@ -182,15 +200,34 @@ export default function Ligas() {
   // -------------------
   // EFFECT
   useEffect(() => {
-    setActiveLeague({});
-    setActiveTeam({});
+    setActiveLeague({
+      code: "",
+      id: "",
+      slug: "",
+      name: "",
+    });
+    setActiveTeam({
+      code: "",
+      slug: "",
+      players: []
+    });
     setTeams([]);
     setPlayers([]);
     getLeagues(targetLeagues)
       .then(
         (response: {
-          leagues: Array<League>;
-          filteredLeagues: Array<League>;
+          leagues: Array<{
+            code: string;
+            id: string;
+            slug: string;
+            name: string;
+          }>;
+          filteredLeagues: Array<{
+            code: string;
+            id: string;
+            slug: string;
+            name: string;
+          }>;
           leagueIds: string;
         }) => {
           setLeagues(response.filteredLeagues);
@@ -242,21 +279,22 @@ export default function Ligas() {
                     )}
 
                     {/* Botão de remover */}
-                    {dbLeagues.data?.find((o) => o.slug === league.slug) && (
-                      <button
-                        className="group"
-                        onClick={() =>
-                          delLeague.mutate({
-                            id: dbLeagues.data?.find(
-                              (o) => o.slug === league.slug
-                            ).id,
-                          })
-                        }
-                      >
-                        <span className="group-hover:hidden">✔️</span>
-                        <span className="hidden group-hover:block">❌</span>
-                      </button>
-                    )}
+                    {dbLeagues.data &&
+                      dbLeagues.data?.find((o) => o.slug === league.slug) && (
+                        <button
+                          className="group"
+                          onClick={() =>
+                            delLeague.mutate({
+                              id: dbLeagues.data?.find(
+                                (o) => o.slug === league.slug
+                              )?.id,
+                            })
+                          }
+                        >
+                          <span className="group-hover:hidden">✔️</span>
+                          <span className="hidden group-hover:block">❌</span>
+                        </button>
+                      )}
 
                     <span className="ml-0.5">{league.name}</span>
                   </li>
@@ -277,14 +315,12 @@ export default function Ligas() {
                     >
                       <button
                         onClick={() =>
-                          activeLeague.slug != league.slug
-                            ? getEsportsTeams(
-                                leagues.find((o) => o.slug == league.slug)
-                              )
+                          activeLeague?.slug != league.slug
+                            ? getEsportsTeams(league)
                             : ""
                         }
                         className={
-                          (activeLeague.slug == league.slug
+                          (activeLeague?.slug == league.slug
                             ? "bg-slate-500"
                             : "bg-slate-500/25") +
                           " rounded-md px-2 py-1 transition-colors hover:bg-slate-500"
@@ -311,7 +347,7 @@ export default function Ligas() {
                               image: team.image,
                               slug: createTeamSlug(team.name),
                               leagueId: dbLeagues.data?.find(
-                                (o) => o.code === activeLeague.code
+                                (o) => o.slug === activeLeague?.code
                               )?.id,
                             })
                           }
@@ -328,7 +364,7 @@ export default function Ligas() {
                             delTeam.mutate({
                               id: dbTeams.data?.find(
                                 (o) => o.code === team.code
-                              ).id,
+                              )?.id,
                             })
                           }
                         >
@@ -353,12 +389,12 @@ export default function Ligas() {
                     <li key={index} className="text-center">
                       <button
                         onClick={() =>
-                          activeTeam.slug != team.slug
+                          activeTeam?.slug != team.slug
                             ? getTeamPlayers(team)
                             : ""
                         }
                         className={
-                          (activeTeam.slug == team.slug
+                          (activeTeam?.slug == team.slug
                             ? "bg-slate-500"
                             : "bg-slate-500/25") +
                           " rounded-md px-2 py-1 transition-colors hover:bg-slate-500"
@@ -386,7 +422,7 @@ export default function Ligas() {
                               nickName: player.summonerName,
                               rating: 50,
                               teamId: dbTeams.data?.find(
-                                (o) => o.code === activeTeam.code
+                                (o) => o.code === activeTeam?.code
                               )?.id,
                             })
                           }
@@ -405,7 +441,7 @@ export default function Ligas() {
                             delPlayer.mutate({
                               id: dbPlayers.data?.find(
                                 (o) => o.nickName === player.summonerName
-                              ).id,
+                              )?.id,
                             })
                           }
                         >
